@@ -1,144 +1,107 @@
 <template>
   <div>
-    <h1 id="h1"></h1>
-    <canvas></canvas>
+    <div class="intro">
+      <el-image :src="avatarPath" fit="cover" />
+      <div class="text">
+        <div class="title">恋爱简介</div>
+        <div class="time">2018/10/30-forever</div>
+        <div class="content">
+          暂无简介
+        </div>
+      </div>
+    </div>
+    <div class="modules">
+      <div v-for="item in moduleList" :key="item.url" :style="{width: item.width || '400px'}" class="module-item" @click="goToItem(item)">
+        <el-image :src="item.imgPath" fit="fill" />
+        <div class="smallTitle">{{ item.title }}</div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {onMounted} from "vue";
+import { useRouter } from 'vue-router'
+let $router = useRouter()
 
-onMounted(() => {
-  const canvas = document.querySelector("canvas")
-  const ctx = canvas.getContext("2d");
-
-  var ww,wh;
-
-  function onResize(){
-    ww = canvas.width = window.innerWidth;
-    wh = canvas.height = window.innerHeight;
-  }
-
-  ctx.strokeStyle = "red";
-  ctx.shadowBlur = 25;
-  ctx.shadowColor = "hsla(0, 100%, 60%,0.5)";
-
-  var precision = 100;
-  var hearts = [];
-  var mouseMoved = false;
-  function onMove(e){
-    mouseMoved = true;
-    if(e.type === "touchmove"){
-      hearts.push(new Heart(e.touches[0].clientX, e.touches[0].clientY));
-      hearts.push(new Heart(e.touches[0].clientX, e.touches[0].clientY));
-    }
-    else{
-      hearts.push(new Heart(e.clientX, e.clientY));
-      hearts.push(new Heart(e.clientX, e.clientY));
-    }
-  }
-
-  var Heart = function(x,y){
-    this.x = x || Math.random()*ww;
-    this.y = y || Math.random()*wh;
-    this.size = Math.random()*2 + 1;
-    this.shadowBlur = Math.random() * 10;
-    this.speedX = (Math.random()+0.2-0.6) * 8;
-    this.speedY = (Math.random()+0.2-0.6) * 8;
-    this.speedSize = Math.random()*0.05 + 0.01;
-    this.opacity = 1;
-    this.vertices = [];
-    for (var i = 0; i < precision; i++) {
-      var step = (i / precision - 0.5) * (Math.PI * 2);
-      var vector = {
-        x : (15 * Math.pow(Math.sin(step), 3)),
-        y : -(13 * Math.cos(step) - 5 * Math.cos(2 * step) - 2 * Math.cos(3 * step) - Math.cos(4 * step))
-      }
-      this.vertices.push(vector);
-    }
-  }
-
-  Heart.prototype.draw = function(){
-    this.size -= this.speedSize;
-    this.x += this.speedX;
-    this.y += this.speedY;
-    ctx.save();
-    ctx.translate(-1000,this.y);
-    ctx.scale(this.size, this.size);
-    ctx.beginPath();
-    for (var i = 0; i < precision; i++) {
-      var vector = this.vertices[i];
-      ctx.lineTo(vector.x, vector.y);
-    }
-    ctx.globalAlpha = this.size;
-    ctx.shadowBlur = Math.round((3 - this.size) * 10);
-    ctx.shadowColor = "hsla(0, 100%, 60%,0.5)";
-    ctx.shadowOffsetX = this.x + 1000;
-    ctx.globalCompositeOperation = "screen"
-    ctx.closePath();
-    ctx.fill()
-    ctx.restore();
-  };
-
-
-  function render(a){
-    requestAnimationFrame(render);
-
-    hearts.push(new Heart())
-    ctx.clearRect(0,0,ww,wh);
-    for (var i = 0; i < hearts.length; i++) {
-      hearts[i].draw();
-      if(hearts[i].size <= 0){
-        hearts.splice(i,1);
-        i--;
-      }
-    }
-  }
-
-
-  onResize();
-  window.addEventListener("mousemove", onMove);
-  window.addEventListener("touchmove", onMove);
-  window.addEventListener("resize", onResize);
-  requestAnimationFrame(render);
-
-  window.onload=function starttime(){
-    time(h1,'2018,10,30');     // 在一起的时间
-    ptimer = setTimeout(starttime,1000); // 添加计时器
-  }
-
-  function time(obj,futimg){
-    var nowtime = new Date().getTime(); // 现在时间转换为时间戳
-    var futruetime =  new Date(futimg).getTime(); // 未来时间转换为时间戳
-    var msec = nowtime-futruetime; // 毫秒 未来时间-现在时间
-    var time = (msec/1000);  // 毫秒/1000
-    var day = parseInt(time/86400); // 天  24*60*60*1000
-    var hour = parseInt(time/3600)-24*day;    // 小时 60*60 总小时数-过去的小时数=现在的小时数
-    var minute = parseInt(time%3600/60); // 分 -(day*24) 以60秒为一整份 取余 剩下秒数 秒数/60 就是分钟数
-    var second = parseInt(time%60);  // 以60秒为一整份 取余 剩下秒数
-//              console.log(hour+":"+minute+":"+second)
-//              alert(hour)
-    obj.innerHTML="宝贝：我已经爱了你<br>"+day+"天"+hour+"小时"+minute+"分"+second+"秒"+"了<br><span>我非常爱你！虽然你无法体会到我的真心，<br>但是我的心中，你是永远的唯一的爱人！我已经学会忘了自己，却无法忘记你。</span>"
-
-    return true;
-  }
-})
+const avatarPath = new URL('@/assets/avatarPath.jpg', import.meta.url).href
+const goToItem = (item) => {
+  $router.push(item.url)
+}
+const moduleList = [{
+  imgPath: new URL('@/assets/_U1A1207.JPG', import.meta.url).href,
+  title: '恋爱计时',
+  url: '/loveTime',
+  width: '200px'
+}]
 </script>
 
-<style scoped>
-h1{
-  position: fixed;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  transform:translateY(-50%);
-  font-family: 'Love Ya Like A Sister', cursive;
-  font-size: 40px;
-  color: #c70012;
-  padding: 0 20px;
+<style scoped lang="scss">
+::v-deep {
+  .el-image__inner {
+    width: 100%;
+    height: 100%;
+  }
 }
-h1 span{
-  font-size:20px;
+.intro {
+  width: 100%;
+  height: 40vh;
+  background: pink;
+  position: relative;
+  .el-image {
+    width: 180px;
+    height: 200px;
+    border-radius: 100px;
+    overflow: hidden;
+    position: absolute;
+    top: 10vh;
+    left: 20vw;
+  }
+  .text {
+    position: absolute;
+    top: 10vh;
+    left: calc(20vw + 250px);
+    .title {
+      font-size: 30px;
+      font-weight: 900;
+      color: skyblue;
+    }
+    .time {
+      margin: 10px 0;
+      font-size: 20px;
+    }
+    .content {
+      border: 2px dotted greenyellow;
+      width: 50vw;
+      height: 180px;
+      padding: 20px;
+    }
+  }
+}
+.modules {
+  width: 100vw;
+  display: flex;
+  flex-wrap: wrap;
+  border-radius: 20px;
+  background: skyblue;
+  .module-item {
+    width: 400px;
+    height: 300px;
+    margin: 20px;
+    border: 2px dotted greenyellow;
+    border-radius: 30px;
+    overflow: hidden;
+    cursor: pointer;
+    .el-image {
+      width: 100%;
+      height: calc(100% - 40px);
+    }
+    .smallTitle {
+      width: 100%;
+      height: 40px;
+      text-align: center;
+      line-height: 40px;
+      background: antiquewhite;
+    }
+  }
 }
 </style>
